@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>✨ Secret Number World · Chibi Pixel Quest</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #fdeff2;
+      --card: #ffffffdd;
+      --text: #5c4b51;
+      --soft-pink: #ffd9e6;
+      --soft-blue: #d4e6f1;
+      --shadow: 0 8px 30px rgba(0,0,0,0.05);
+      --font: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+      --border-radius: 2.5rem;
+      --glow: 0 0 20px #ffb7c5;
+    }
+
+    body.dark {
+      --bg: #1a2b3c;
+      --card: #1f313e;
+      --text: #e6d7d9;
+      --soft-pink: #3b4b5a;
+      --soft-blue: #2f4459;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.5s ease, color 0.5s ease;
+      padding: 1rem;
+      margin: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* animated pixel clouds background */
+    .clouds {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .cloud {
+      position: absolute;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: floatCloud 25s infinite alternate ease-in-out;
+    }
+    .cloud::after {
+      content: "";
+      display: block;
+      background: inherit;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .cloud1 { width: 120px; height: 60px; top: 10%; left: 5%; }
+    .cloud2 { width: 160px; height: 70px; top: 25%; right: 3%; animation-duration: 30s; }
+    .cloud3 { width: 100px; height: 50px; bottom: 15%; left: 10%; animation-duration: 22s; }
+    .cloud4 { width: 140px; height: 65px; bottom: 30%; right: 8%; animation-duration: 28s; }
+
+    @keyframes floatCloud {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(30px, -20px); }
+    }
+
+    .game-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 550px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border-radius: var(--border-radius);
+      padding: 1.8rem 1.5rem 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      border: 1px solid rgba(255,255,240,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* splash / intro */
+    #intro-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    .chibi-group {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .chibi-mascot {
+      font-size: 4rem;
+      filter: drop-shadow(0 8px 6px rgba(0,0,0,0.1));
+      transition: transform 0.3s;
+      background: #fff2f5;
+      border-radius: 100px;
+      padding: 0.3rem 0.6rem;
+      line-height: 1;
+    }
+    .logo-text {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f8a5c2, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0.3rem 0;
+      text-shadow: 2px 2px 0 #fff5f9;
+      letter-spacing: -0.5px;
+    }
+    .by-line {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-weight: 500;
+      margin-top: 0.2rem;
+    }
+    .btn {
+      background: #ffe4ec;
+      border: none;
+      padding: 0.9rem 2.2rem;
+      border-radius: 3rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #5c3e4b;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #f0b8c5;
+      transition: 0.1s linear;
+      margin: 0.6rem 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      letter-spacing: 0.5px;
+    }
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #f0b8c5;
+    }
+
+    .world-map {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.2rem 0;
+    }
+    .world-card {
+      background: #fffafc;
+      border-radius: 2rem;
+      padding: 1rem 1.2rem;
+      text-align: center;
+      box-shadow: 0 10px 14px rgba(251, 208, 220, 0.4);
+      cursor: pointer;
+      transition: 0.2s;
+      width: 120px;
+    }
+    .world-card:hover {
+      transform: scale(1.04);
+      background: #ffeef4;
+    }
+
+    .guess-history {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+    }
+    .history-badge {
+      background: #f3d9e4;
+      border-radius: 20px;
+      padding: 0.2rem 0.8rem;
+    }
+
+    .timer-danger {
+      color: #c44569;
+      font-weight: bold;
+      animation: blink 0.7s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.4; } }
+
+    .confetti {
+      position: fixed;
+      width: 12px;
+      height: 12px;
+      background: #f7b2c7;
+      top: -20px;
+      animation: drop linear forwards;
+      z-index: 999;
+    }
+    @keyframes drop {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .visitor-badge {
+      background: #fee3ec;
+      border-radius: 20px;
+      padding: 0.3rem 1.2rem;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 450px) {
+      .game-wrapper { padding: 1.5rem 1rem; }
+      .chibi-mascot { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="clouds">
+  <div class="cloud cloud1"></div><div class="cloud cloud2"></div>
+  <div class="cloud cloud3"></div><div class="cloud cloud4"></div>
+</div>
+
+<div class="game-wrapper" id="gameContainer">
+  <!-- intro screen -->
+  <div id="intro-screen">
+    <div class="chibi-group">
+      <span class="chibi-mascot">🐱</span>
+      <span class="chibi-mascot">🐶</span>
+      <span class="chibi-mascot">🐰</span>
+    </div>
+    <div class="logo-text">Guess the Secret Number</div>
+    <div class="by-line">By : Kelompok 3 Algoritma Pemrograman</div>
+    <div style="font-size:0.8rem; margin-bottom: 0.6rem;">Natalie, Nada, Pasya, Sumiyati, Ona, Syera</div>
+    <button class="btn" id="startGameBtn">✨ Start Game ✨</button>
+    <div class="visitor-badge" id="visitorDisplay">🌸 1,203 players visited</div>
+    <button id="themeToggle" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌙</button>
+  </div>
+
+  <!-- world selection (hidden initially) -->
+  <div id="worldScreen" style="display: none; width:100%; text-align:center;">
+    <div class="chibi-group" style="font-size:2.5rem;">🐱🐶🐰</div>
+    <h2 style="margin:0.5rem;">🌟 Choose Your Path</h2>
+    <div class="world-map">
+      <div class="world-card" data-level="easy"><span style="font-size:2rem;">🫧</span><br>Easy Peasy<br><small>0-50 · 10 tries</small></div>
+      <div class="world-card" data-level="medium"><span style="font-size:2rem;">🧩</span><br>Getting Serious<br><small>0-200 · 7 tries</small></div>
+      <div class="world-card" data-level="hard"><span style="font-size:2rem;">🪦</span><br>Nightmare Mode<br><small>1-500 · 10 tries ⏳75s</small></div>
+    </div>
+    <button class="btn" id="backToIntro" style="background:#e6e0f0;">← Back</button>
+  </div>
+
+  <!-- game active screen -->
+  <div id="gameScreen" style="display: none; width:100%; text-align:center;">
+    <div id="mascotTalk" style="font-size:1.8rem; margin:0.2rem;">🐱 "Aku sembunyikan angka rahasia!"</div>
+    <div style="font-weight:bold;" id="levelDisplay"></div>
+    <div id="timerDisplay" style="font-size:1.2rem; margin:0.3rem;"></div>
+    <div id="hintAnimation" style="min-height:2.2rem; font-weight:500; margin:0.3rem;">✨</div>
+    <input type="number" id="guessInput" placeholder="Tebak angka..." style="padding:0.8rem; border-radius:2rem; border:2px solid #fbc0cb; width:80%; text-align:center; font-size:1rem;">
+    <br>
+    <button class="btn" id="submitGuess">🔮 Guess</button>
+    <div class="guess-history" id="historyContainer"></div>
+    <div id="chancesLeft"></div>
+    <button class="btn" id="quitGame" style="background:#f1e0e5;">🏠 Quit</button>
+  </div>
+
+  <!-- ending screen -->
+  <div id="endingScreen" style="display:none; text-align:center; width:100%;">
+    <div style="font-size:3rem;">🎆🏆🎆</div>
+    <h2>You saved the Secret Numbers World!</h2>
+    <div class="chibi-group">🐱🐶🐰</div>
+    <button class="btn" id="playAgainBtn">🔁 Play Again</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- SOUND ENGINE (tiny sfx) ----------
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function initAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+    function playTone(freq, type='sine', duration=0.15, vol=0.2) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = vol;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+    function sfxPop() { playTone(600, 'triangle', 0.1, 0.15); }
+    function sfxType() { playTone(300, 'sine', 0.08, 0.1); }
+    function sfxWin() { playTone(800, 'triangle', 0.2); setTimeout(()=>playTone(1000,'sine',0.2),0.15); }
+    function sfxLose() { playTone(200, 'sawtooth', 0.3, 0.2); }
+    function sfxTick() { playTone(500, 'square', 0.05, 0.1); }
+    function sfxEaster() { playTone(900,'triangle',0.15); setTimeout(()=>playTone(1100,'sine',0.2),0.12); }
+
+    // ---------- GLOBAL STATE ----------
+    const body = document.body;
+    const introScreen = document.getElementById('intro-screen');
+    const worldScreen = document.getElementById('worldScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const endingScreen = document.getElementById('endingScreen');
+    const visitorSpan = document.getElementById('visitorDisplay');
+
+    // visitor fake count
+    let baseVisitors = 1203 + Math.floor(Math.random()*400);
+    visitorSpan.textContent = `🌸 ${baseVisitors.toLocaleString()} players visited`;
+
+    let currentLevel = null; // 'easy','medium','hard'
+    let secretNumber = null;
+    let chancesLeft = 10;
+    let maxNumber = 50;
+    let timerInterval = null;
+    let timeLeft = 75;
+    let gameActive = false;
+    let historyGuesses = [];
+
+    // best stats (localStorage)
+    let bestStats = { easy: null, medium: null, hard: null };
+    try {
+      const saved = localStorage.getItem('chibiGuessBest');
+      if (saved) bestStats = JSON.parse(saved);
+    } catch(e){}
+
+    // mascots
+    const mascots = { easy:'🐱', medium:'🐶', hard:'🐰' };
+
+    // DOM elements
+    const mascotTalk = document.getElementById('mascotTalk');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const hintAnimation = document.getElementById('hintAnimation');
+    const guessInput = document.getElementById('guessInput');
+    const historyContainer = document.getElementById('historyContainer');
+    const chancesLeftSpan = document.getElementById('chancesLeft');
+
+    // ---------- FUNCTIONS ----------
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateSecret(level) {
+      if (level === 'easy') return randomInt(0, 50);
+      if (level === 'medium') return randomInt(0, 200);
+      return randomInt(1, 500);
+    }
+
+    function stopTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+    function updateChancesDisplay() {
+      if (chancesLeftSpan) chancesLeftSpan.textContent = `❤️ ${chancesLeft} chances`;
+    }
+
+    function renderHistory() {
+      historyContainer.innerHTML = historyGuesses.map(g => `<span class="history-badge">${g}</span>`).join('');
+    }
+
+    function launchConfetti() {
+      for (let i=0; i<60; i++) {
+        setTimeout(() => {
+          const conf = document.createElement('div');
+          conf.className = 'confetti';
+          conf.style.left = Math.random()*100+'%';
+          conf.style.background = `hsl(${Math.random()*360}, 70%, 75%)`;
+          conf.style.animationDuration = (2+Math.random()*2)+'s';
+          document.body.appendChild(conf);
+          setTimeout(()=> conf.remove(), 3000);
+        }, i*20);
+      }
+    }
+
+    function setMascotEmotion(emotion) {
+      const levelMascot = mascots[currentLevel] || '🐱';
+      if (emotion === 'win') mascotTalk.innerHTML = `${levelMascot} "WOW GENIUS!!!" 🎉`;
+      else if (emotion === 'lose') mascotTalk.innerHTML = `${levelMascot} "Yah, kamu kalah... 🥺"`;
+      else if (emotion === 'close') mascotTalk.innerHTML = `${levelMascot} "SO CLOSE!!! 🔥"`;
+      else mascotTalk.innerHTML = `${levelMascot} "Aku sembunyikan angka rahasia!"`;
+    }
+
+    function checkEasterEgg(guess) {
+      if (guess === 67 || guess === 123 || guess === 404) {
+        sfxEaster();
+        hintAnimation.textContent = '🥚✨ EASTER EGG! Angka spesial! ✨🥚';
+        setTimeout(()=> { if (gameActive) hintAnimation.textContent = '✨'; }, 1500);
+        return true;
+      }
+      return false;
+    }
+
+    function handleWin() {
+      if (!gameActive) return;
+      gameActive = false;
+      stopTimer();
+      sfxWin();
+      launchConfetti();
+      setMascotEmotion('win');
+      hintAnimation.textContent = '🎉 CONGRATULATIONS! 🎉';
+
+      // save best
+      const triesUsed = (currentLevel==='easy'?10:currentLevel==='medium'?7:10) - chancesLeft + 1;
+      if (currentLevel === 'hard') {
+        const timeTaken = 75 - timeLeft;
+        if (!bestStats.hard || timeTaken < bestStats.hard) bestStats.hard = timeTaken;
+      } else if (currentLevel === 'easy') {
+        if (!bestStats.easy || triesUsed < bestStats.easy) bestStats.easy = triesUsed;
+      } else if (currentLevel === 'medium') {
+        if (!bestStats.medium || triesUsed < bestStats.medium) bestStats.medium = triesUsed;
+      }
+      localStorage.setItem('chibiGuessBest', JSON.stringify(bestStats));
+
+      setTimeout(() => {
+        gameScreen.style.display = 'none';
+        endingScreen.style.display = 'block';
+      }, 1200);
+    }
+
+    function handleLoss(reason = 'chances') {
+      if (!gameActive) return;
+      gameActive = false;
+      stopTimer();
+      sfxLose();
+      setMascotEmotion('lose');
+      hintAnimation.textContent = `😭 ${reason === 'time' ? 'Waktu habis!' : 'Kesempatan habis!'} Angkanya ${secretNumber}`;
+      setTimeout(() => {
+        gameScreen.style.display = 'none';
+        worldScreen.style.display = 'block';
+      }, 2000);
+    }
+
+    function processGuess() {
+      if (!gameActive) return;
+      const inputVal = guessInput.value.trim();
+      if (inputVal === '') return;
+      const guess = Number(inputVal);
+      if (isNaN(guess) || !Number.isInteger(guess)) {
+        hintAnimation.textContent = '⚠️ Masukkan angka bulat ya!';
+        return;
+      }
+      sfxType();
+      checkEasterEgg(guess);
+      historyGuesses.push(guess);
+      renderHistory();
+      chancesLeft--;
+      updateChancesDisplay();
+
+      if (guess === secretNumber) {
+        handleWin();
+        return;
+      }
+
+      if (chancesLeft <= 0) {
+        handleLoss('chances');
+        return;
+      }
+
+      // hint animation with text
+      if (guess < secretNumber) {
+        hintAnimation.textContent = '📈 Terlalu rendah! Coba lebih tinggi.';
+      } else {
+        hintAnimation.textContent = '📉 Terlalu tinggi! Coba lebih rendah.';
+      }
+      if (Math.abs(guess - secretNumber) <= 3) {
+        setMascotEmotion('close');
+      }
+      guessInput.value = '';
+      guessInput.focus();
+    }
+
+    function startGame(level) {
+      stopTimer();
+      currentLevel = level;
+      secretNumber = generateSecret(level);
+      gameActive = true;
+      historyGuesses = [];
+      if (level === 'easy') { chancesLeft = 10; maxNumber = 50; }
+      else if (level === 'medium') { chancesLeft = 7; maxNumber = 200; }
+      else { chancesLeft = 10; maxNumber = 500; timeLeft = 75; }
+
+      worldScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      endingScreen.style.display = 'none';
+      levelDisplay.textContent = `🎯 Tebak 0-${maxNumber}${level==='hard'?' (1-500)':''}`;
+      hintAnimation.textContent = '✨';
+      guessInput.value = '';
+      renderHistory();
+      updateChancesDisplay();
+      setMascotEmotion('neutral');
+      timerDisplay.textContent = '';
+
+      if (level === 'hard') {
+        timerDisplay.textContent = `⏳ ${timeLeft}s`;
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `⏳ ${timeLeft}s`;
+          sfxTick();
+          if (timeLeft <= 10) timerDisplay.classList.add('timer-danger');
+          else timerDisplay.classList.remove('timer-danger');
+          if (timeLeft <= 0) {
+            stopTimer();
+            handleLoss('time');
+          }
+        }, 1000);
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('startGameBtn').addEventListener('click', ()=>{
+      initAudio();
+      sfxPop();
+      introScreen.style.display = 'none';
+      worldScreen.style.display = 'block';
+    });
+
+    document.querySelectorAll('.world-card').forEach(card => {
+      card.addEventListener('click', (e)=>{
+        const level = card.dataset.level;
+        initAudio();
+        sfxPop();
+        startGame(level);
+      });
+    });
+
+    document.getElementById('submitGuess').addEventListener('click', ()=>{
+      initAudio();
+      processGuess();
+    });
+    guessInput.addEventListener('keypress', (e)=>{
+      if (e.key === 'Enter') {
+        initAudio();
+        processGuess();
+      }
+    });
+
+    document.getElementById('quitGame').addEventListener('click', ()=>{
+      stopTimer();
+      gameActive = false;
+      gameScreen.style.display = 'none';
+      worldScreen.style.display = 'block';
+      sfxPop();
+    });
+
+    document.getElementById('backToIntro').addEventListener('click', ()=>{
+      worldScreen.style.display = 'none';
+      introScreen.style.display = 'flex';
+      sfxPop();
+    });
+
+    document.getElementById('playAgainBtn').addEventListener('click', ()=>{
+      endingScreen.style.display = 'none';
+      worldScreen.style.display = 'block';
+      sfxPop();
+    });
+
+    // theme toggle
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', ()=>{
+      body.classList.toggle('dark');
+      themeBtn.textContent = body.classList.contains('dark') ? '☀️' : '🌙';
+      sfxPop();
+    });
+
+    // small visitor increment illusion
+    setInterval(()=>{
+      baseVisitors += Math.floor(Math.random()*3);
+      visitorSpan.textContent = `🌸 ${baseVisitors.toLocaleString()} players visited`;
+    }, 15000);
+  })();
+</script>
+</body>
+</html>
